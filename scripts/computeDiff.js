@@ -11,12 +11,31 @@ function computeLostDiff(startArray, endArray) {
   }
   return finalArray;
 }
+
+function divideRangeIntoSections(min, max, avg) {
+  const aboveAvgRange = max - avg;
+  const belowAvgRange = avg - min;
+
+  const hexArray = [0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF]
+
+  return [hexArray.slice(0, Math.round(15 - Math.sqrt(belowAvgRange))), hexArray.slice(Math.round(1 - Math.sqrt(aboveAvgRange)))] ;
+}
+
+// Example usage:
+const min = 84;
+const max = 255;
+const avg = 157;
+
+const result = divideRangeIntoSections(min, max, avg);
+console.log(result);
+
 // 11, 255, 157
 function stepGreater(steps, max, avg){
   let diff = max - avg;
   let step = diff / steps;
   return step;
 };
+
 function roundedDiffFromAvg_DEC(greaterStep, lesserStep, avg, startArray) {
   let diffArray = [];
   for(let i = 0; i < startArray.length; i++) {
