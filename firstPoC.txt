@@ -1,0 +1,21 @@
+array of [ FF, D4, D4, A1, A1, 78, 78, 54, 54 ]
+array of [ 255, 212, 212, 161, 161, 120, 120, 84, 84 ]
+
+avg is 157
+max : 255
+min : 84
+
+^max_avg = 98
+^min_avg = 73
+
+max zone : 9 values -> 7, 8, 9, A, B, C, D, E, F
+min zone : 6 values -> 1, 2, 3, 4, 5, 6
+
+max step : round(98/9) = 11
+min step : round(73/6) = 12
+
+array of [ +99, +55, +55, 0, 0, -36, -36, -72, -72]
+array of [ F, B, B, 0, 0, 4, 4, 1, 1 ]
+
+lossy array of [ 255, 212, 212, 157, 157, 121, 121, 85, 85]
+diff array of [ 0, 0, 0, -4, -4, +1, +1, +1, +1]
