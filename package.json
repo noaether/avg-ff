@@ -1,0 +1,24 @@
+{
+  "name": "avg-ff",
+  "version": "1.0.0",
+  "description": "A useless presqu'esoteric file format for (very) lossy image storage. Making your images worse, with even worse code !",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noaether/avg-ff.git"
+  },
+  "keywords": [
+    "image",
+    "esoteric",
+    "lossy"
+  ],
+  "author": "Noa St-Onge",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/noaether/avg-ff/issues"
+  },
+  "homepage": "https://github.com/noaether/avg-ff#readme"
+}
