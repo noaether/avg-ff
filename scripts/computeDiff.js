@@ -13,6 +13,13 @@ function computeLostDiff(startArray, endArray) {
 }
 
 function divideRangeIntoSections(min, max, avg) {
+
+  /*
+  * WHY IT WORKS
+  * Considering a max number of sections = 15 sections, take x as 
+  * above avg sections = x-1
+  */
+
   const aboveAvgRange = max - avg;
   const belowAvgRange = avg - min;
 
