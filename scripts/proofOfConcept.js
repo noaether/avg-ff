@@ -106,8 +106,13 @@ function diffToFinal(avg, min, max, diffArrayDEC) {
 function calculateRelativeError(startArray, finalArray) {
   let error = 0;
   for (let i = 0; i < startArray.length; i++) {
-    startArray[i] === 0 ? error += Math.abs((startArray[i-1] - finalArray[i-1])/startArray[i-1]) * 100 :
-    error += Math.abs((startArray[i] - finalArray[i])/startArray[i]) * 100;
+    let tempError = Math.abs((startArray[i] - finalArray[i])/startArray[i]) * 100;
+    let j = 1;
+    while(isNaN(tempError)) {
+      tempError = Math.abs((startArray[i-j] - finalArray[i-j])/startArray[i-j]) * 100;
+      j++;
+    }
+    error += tempError;
   }
   return (error/startArray.length);
 }
@@ -131,29 +136,25 @@ function runSimulation(maxRuns, width, range, bool_writeToSVG) {
   let relativeErrorTotal = 0;
 
   for(let i = 0; i < maxRuns; i++) {
-    const startArray = Array.from({length: width}, () => Math.floor(Math.random() * range));
+    const startArray = Array.from({length: width}, () => (Math.floor(Math.random() * (range-1))+1));
     const finalArray = startToFinish(startArray);
 
     bool_writeToSVG ? svgArray.push(generateSVG(startArray.map((n) => `#${toHex(n)}${toHex(n)}${toHex(n)}`))) : null;
     bool_writeToSVG ? svgArray.push(generateSVG(finalArray.map((n) => `#${toHex(n)}${toHex(n)}${toHex(n)}`))) : null;
 
-    relativeErrorTotal += parseInt(calculateRelativeError(startArray, finalArray));
-
-    //console.log(startArray);
-    //console.log(computeLostDiff(startArray, finalArray));
-    //console.log(finalArray)
+    relativeErrorTotal += calculateRelativeError(startArray, finalArray);
   }
 
   bool_writeToSVG ? writeSVGSToHTMLFile(svgArray) : null;
 
-  return relativeErrorTotal/maxRuns;
+  return (relativeErrorTotal/maxRuns);
 }
 
 function testRelativeError() {
   let relativeErrorArray = [];
-  for(let i = 0; i < 4096; i++) {
-    const relativeError = runSimulation(64, 64, i, false);
-    console.log(relativeError)
+  for(let i = 0; i < 1; i++) {
+    const relativeError = runSimulation(128, 128, 1024, false);
+    console.log(relativeError.toFixed(2));
   }
 }
 
