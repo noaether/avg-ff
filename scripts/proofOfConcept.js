@@ -30,13 +30,15 @@ function computeLostDiff(startArray, endArray) {
  * @returns {Map} An array containing the sections for the "below average" range, the number of values covered by each section in the "below average" range, the sections for the "above average" range, and the number of values covered by each section in the "above average" range.
  */
 function divideRangeIntoSections(min, max, avg) {
-
   const deltaMaxAvg = max - avg;
   const deltaAvgMin = avg - min;
 
+  const nAboveSections = Math.round((15*deltaMaxAvg)/(deltaMaxAvg + deltaAvgMin));
+  const nBelowSections = 15 - nAboveSections;
+
   const hexArray = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"];
-  const minRangeArray = hexArray.slice(0, Math.round(15 - Math.sqrt(deltaAvgMin)));
-  const maxRangeArray = hexArray.slice(Math.round(1 - Math.sqrt(deltaMaxAvg)));
+  const minRangeArray = hexArray.slice(0, nBelowSections);
+  const maxRangeArray = hexArray.slice(0 - nAboveSections);
 
   const returnMap = new Map();
 
@@ -75,12 +77,12 @@ function roundedDiffFromAvg_DEC(belowRangeStep, aboveRangeStep, avg, startArray)
  * @param {number[]} diffArrayDEC - The array of differences from the average in decimal.
  * @returns {string[]} - The array of differences from the average in hexadecimal.
  */
-function diffDEC_to_diffHEX(belowRangeSymbols, aboveRangeSymbols, diffArrayDEC) {
+function diffDEC_to_diffHEX(belowRangeSymbols, belowRangeStep, aboveRangeSymbols, aboveRangeStep, diffArrayDEC) {
   let diffArrayHEX = [];
   for(let i = 0; i < diffArrayDEC.length; i++) {
     const n = diffArrayDEC[i];
-    (n > 0) ? diffArrayHEX.push(aboveRangeSymbols[(n-11)/11]) :
-    (n < 0) ? diffArrayHEX.push(belowRangeSymbols[(n/12)+6]) :
+    (n > 0) ? diffArrayHEX.push(aboveRangeSymbols[(n-aboveRangeStep)/aboveRangeStep]) :
+    (n < 0) ? diffArrayHEX.push(belowRangeSymbols[belowRangeSymbols.length + (n/belowRangeStep)]) :
               diffArrayHEX.push(0);
   }
   return diffArrayHEX;
@@ -122,7 +124,7 @@ console.log("DRIS\r\n", dRIS);
 const diffArrayDEC = roundedDiffFromAvg_DEC(dRIS.get('belowRangeStep'), dRIS.get('aboveRangeStep'), avg, startArray);
 console.log("diffArrayDEC\r\n", diffArrayDEC);
 
-const diffArrayHEX = diffDEC_to_diffHEX(dRIS.get('belowRangeSymbols'), dRIS.get('aboveRangeSymbols'), diffArrayDEC);
+const diffArrayHEX = diffDEC_to_diffHEX(dRIS.get('belowRangeSymbols'), dRIS.get('belowRangeStep'), dRIS.get('aboveRangeSymbols'), dRIS.get('aboveRangeStep'), diffArrayDEC);
 console.log("diffArrayHex\r\n", diffArrayHEX);
 
 const finalArray = diffToFinal(avg, min, max, diffArrayDEC);
