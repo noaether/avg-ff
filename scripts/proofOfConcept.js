@@ -1,3 +1,5 @@
+let { generateSVG, writeSVGToHTMLFile, writeSVGSToHTMLFile } = require('./makeCanvas.js');
+
 const toHex = (dec) => {return dec.toString(16).padStart(2, '0')};
 const toDec = (hex) => {return parseInt(hex, 16)};
 const getMax = (array) => {return Math.max(...array)};
@@ -104,32 +106,60 @@ function diffToFinal(avg, min, max, diffArrayDEC) {
 function calculateRelativeError(startArray, finalArray) {
   let error = 0;
   for (let i = 0; i < startArray.length; i++) {
-    error += Math.abs(startArray[i] - finalArray[i]);
+    startArray[i] === 0 ? error += Math.abs((startArray[i-1] - finalArray[i-1])/startArray[i-1]) * 100 :
+    error += Math.abs((startArray[i] - finalArray[i])/startArray[i]) * 100;
   }
-  return error/startArray.length;
+  return (error/startArray.length);
+}
+
+function startToFinish(startArray) {
+  const max = getMax(startArray);
+  const avg = Math.round(getAvg(startArray));
+  const min = getMin(startArray);
+
+  const dRIS = divideRangeIntoSections(min, max, avg);
+  const diffArrayDEC = roundedDiffFromAvg_DEC(dRIS.get('belowRangeStep'), dRIS.get('aboveRangeStep'), avg, startArray);
+  //const diffArrayHEX = diffDEC_to_diffHEX(dRIS.get('belowRangeSymbols'), dRIS.get('belowRangeStep'), dRIS.get('aboveRangeSymbols'), dRIS.get('aboveRangeStep'), diffArrayDEC);
+  const finalArray = diffToFinal(avg, min, max, diffArrayDEC);
+
+  return finalArray;
 }
 
 
-const startArray = [139, 194, 115, 196, 246, 2, 181, 104, 204];
+function runSimulation(maxRuns, width, range, bool_writeToSVG) {
+  let svgArray = [];
+  let relativeErrorTotal = 0;
 
-const max = getMax(startArray);
-const avg = Math.round(getAvg(startArray));
-const min = getMin(startArray);
+  for(let i = 0; i < maxRuns; i++) {
+    const startArray = Array.from({length: width}, () => Math.floor(Math.random() * range));
+    const finalArray = startToFinish(startArray);
 
-console.log(`Max: ${max}, Avg: ${avg}, Min: ${min}`);
+    bool_writeToSVG ? svgArray.push(generateSVG(startArray.map((n) => `#${toHex(n)}${toHex(n)}${toHex(n)}`))) : null;
+    bool_writeToSVG ? svgArray.push(generateSVG(finalArray.map((n) => `#${toHex(n)}${toHex(n)}${toHex(n)}`))) : null;
 
-const dRIS = divideRangeIntoSections(min, max, avg);
-console.log("DRIS\r\n", dRIS);
+    relativeErrorTotal += parseInt(calculateRelativeError(startArray, finalArray));
 
-const diffArrayDEC = roundedDiffFromAvg_DEC(dRIS.get('belowRangeStep'), dRIS.get('aboveRangeStep'), avg, startArray);
-console.log("diffArrayDEC\r\n", diffArrayDEC);
+    //console.log(startArray);
+    //console.log(computeLostDiff(startArray, finalArray));
+    //console.log(finalArray)
+  }
 
-const diffArrayHEX = diffDEC_to_diffHEX(dRIS.get('belowRangeSymbols'), dRIS.get('belowRangeStep'), dRIS.get('aboveRangeSymbols'), dRIS.get('aboveRangeStep'), diffArrayDEC);
-console.log("diffArrayHex\r\n", diffArrayHEX);
+  bool_writeToSVG ? writeSVGSToHTMLFile(svgArray) : null;
 
-const finalArray = diffToFinal(avg, min, max, diffArrayDEC);
-console.log(finalArray);
+  return relativeErrorTotal/maxRuns;
+}
 
-console.log(computeLostDiff(startArray, finalArray));
-console.log(calculateRelativeError(startArray, finalArray));
+function testRelativeError() {
+  let relativeErrorArray = [];
+  for(let i = 0; i < 4096; i++) {
+    const relativeError = runSimulation(64, 64, i, false);
+    console.log(relativeError)
+  }
+}
+
+testRelativeError();
+
+
+const startArray = [0xFF, 0xD4, 0xA1, 0x78, 0x54, 0x30, 0x00, 0x30, 0x54, 0x78, 0xA1, 0xFF, 0xA1, 0x78, 0x54, 0x30]
+const finalArray = startToFinish(startArray);
 
