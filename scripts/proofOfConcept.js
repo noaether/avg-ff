@@ -27,7 +27,7 @@ function computeLostDiff(startArray, endArray) {
  * @param {number} min - The minimum value of the range.
  * @param {number} max - The maximum value of the range.
  * @param {number} avg - The average value of the range.
- * @returns {Array} An array containing the sections for the "below average" range, the number of values covered by each section in the "below average" range, the sections for the "above average" range, and the number of values covered by each section in the "above average" range.
+ * @returns {Map} An array containing the sections for the "below average" range, the number of values covered by each section in the "below average" range, the sections for the "above average" range, and the number of values covered by each section in the "above average" range.
  */
 function divideRangeIntoSections(min, max, avg) {
 
@@ -56,39 +56,53 @@ function divideRangeIntoSections(min, max, avg) {
   const deltaMaxAvg = max - avg;
   const deltaAvgMin = avg - min;
 
-  const hexArray = [0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF]
+  const hexArray = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"];
   const minRangeArray = hexArray.slice(0, Math.round(15 - Math.sqrt(deltaAvgMin)));
   const maxRangeArray = hexArray.slice(Math.round(1 - Math.sqrt(deltaMaxAvg)));
 
-  return [minRangeArray, Math.round(deltaAvgMin/minRangeArray.length), maxRangeArray, Math.round(deltaMaxAvg/maxRangeArray.length)] ;
+  const returnMap = new Map();
+
+  returnMap.set("belowRangeSymbols", minRangeArray);
+  returnMap.set("belowRangeStep", Math.round(deltaAvgMin/minRangeArray.length));
+  returnMap.set("aboveRangeSymbols", maxRangeArray);
+  returnMap.set("aboveRangeStep", Math.round(deltaMaxAvg/maxRangeArray.length));
+
+  return returnMap;
 }
 
 
 /**
  * Calculates the rounded difference from the average for each element in the given array.
- * @param {number} greaterStep - The step value used for numbers greater than the average.
- * @param {number} lesserStep - The step value used for numbers less than the average.
+ * @param {number} belowRangeStep - The step value used for numbers less than the average.
+ * @param {number} aboveRangeStep - The step value used for numbers greater than the average.
  * @param {number} avg - The average value.
  * @param {number[]} startArray - The array of numbers to calculate the difference from the average.
  * @returns {number[]} - The array of rounded differences from the average.
  */
-function roundedDiffFromAvg_DEC(greaterStep, lesserStep, avg, startArray) {
+function roundedDiffFromAvg_DEC(belowRangeStep, aboveRangeStep, avg, startArray) {
   let diffArrayDEC = [];
   for(let i = 0; i < startArray.length; i++) {
     const n = startArray[i];
-    (n > avg) ? diffArrayDEC.push(greaterStep * Math.round((startArray[i]-avg)/greaterStep)) :
-    (n < avg) ? diffArrayDEC.push(lesserStep * Math.round((startArray[i]-avg)/lesserStep)) :
+    (n < avg) ? diffArrayDEC.push(belowRangeStep * Math.round((startArray[i]-avg)/belowRangeStep)) :
+    (n > avg) ? diffArrayDEC.push(aboveRangeStep * Math.round((startArray[i]-avg)/aboveRangeStep)) :
                 diffArrayDEC.push(0);
   }
   return diffArrayDEC;
 }
 
+/**
+ * Converts the decimal difference array to hexadecimal.
+ * @param {string[]} belowRangeSymbols - The symbols used for numbers less than the average.
+ * @param {string[]} aboveRangeSymbols - The symbols used for numbers greater than the average.
+ * @param {number[]} diffArrayDEC - The array of differences from the average in decimal.
+ * @returns {string[]} - The array of differences from the average in hexadecimal.
+ */
 function diffDEC_to_diffHEX(belowRangeSymbols, aboveRangeSymbols, diffArrayDEC) {
   let diffArrayHEX = [];
   for(let i = 0; i < diffArrayDEC.length; i++) {
     const n = diffArrayDEC[i];
-    (n > 0) ? diffArrayHEX.push(aboveRangeSymbols[n]) :
-    (n < 0) ? diffArrayHEX.push(belowRangeSymbols[n]) :
+    (n > 0) ? diffArrayHEX.push(aboveRangeSymbols[(n-11)/11]) :
+    (n < 0) ? diffArrayHEX.push(belowRangeSymbols[(n/12)+6]) :
               diffArrayHEX.push(0);
   }
   return diffArrayHEX;
@@ -98,9 +112,18 @@ function diffDEC_to_diffHEX(belowRangeSymbols, aboveRangeSymbols, diffArrayDEC) 
 const startArray = [255, 212, 212, 161, 161, 120, 120, 84, 84];
 const endArray = [255, 212, 212, 157, 157, 121, 121, 85, 85];
 
-const divideRangeIntoSections_RESULTS = divideRangeIntoSections(getMin(startArray), getMax(startArray), getAvg(startArray));
+const max = getMax(startArray);
+const avg = getAvg(startArray);
+const min = getMin(startArray);
 
-console.log(roundedDiffFromAvg_DEC(11, 12, 157, startArray))
-console.log(divideRangeIntoSections_RESULTS);
+const dRIS = divideRangeIntoSections(min, max, avg);
+console.log(dRIS);
+
+const diffArrayDEC = roundedDiffFromAvg_DEC(dRIS.get('belowRangeStep'), dRIS.get('aboveRangeStep'), avg, startArray);
+console.log(diffArrayDEC);
+
+const diffArrayHEX = diffDEC_to_diffHEX(dRIS.get('belowRangeSymbols'), dRIS.get('aboveRangeSymbols'), diffArrayDEC);
+console.log(diffArrayHEX);
+
 console.log(computeLostDiff(startArray, endArray));
 
