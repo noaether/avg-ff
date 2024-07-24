@@ -108,22 +108,46 @@ function diffDEC_to_diffHEX(belowRangeSymbols, aboveRangeSymbols, diffArrayDEC) 
   return diffArrayHEX;
 }
 
+function diffToFinal(avg, min, max, diffArrayDEC) {
+  let finalArray = [];
+  for(let i = 0; i < diffArrayDEC.length; i++) {
+    const n = diffArrayDEC[i];
+    finalArray.push(
+      (avg + n > max) ? max :
+      (avg + n < min) ? min :
+                        avg + n
+    );
+  }
+  return finalArray;
+}
+
+function calculateRelativeError(startArray, finalArray) {
+  let error = 0;
+  for (let i = 0; i < startArray.length; i++) {
+    error += Math.abs(startArray[i] - finalArray[i]);
+  }
+  return error/startArray.length;
+}
+
 
 const startArray = [255, 212, 212, 161, 161, 120, 120, 84, 84];
-const endArray = [255, 212, 212, 157, 157, 121, 121, 85, 85];
 
 const max = getMax(startArray);
-const avg = getAvg(startArray);
+const avg = Math.round(getAvg(startArray));
 const min = getMin(startArray);
 
 const dRIS = divideRangeIntoSections(min, max, avg);
-console.log(dRIS);
+console.log("DRIS\r\n", dRIS);
 
 const diffArrayDEC = roundedDiffFromAvg_DEC(dRIS.get('belowRangeStep'), dRIS.get('aboveRangeStep'), avg, startArray);
-console.log(diffArrayDEC);
+console.log("diffArrayDEC\r\n", diffArrayDEC);
 
 const diffArrayHEX = diffDEC_to_diffHEX(dRIS.get('belowRangeSymbols'), dRIS.get('aboveRangeSymbols'), diffArrayDEC);
-console.log(diffArrayHEX);
+console.log("diffArrayHex\r\n", diffArrayHEX);
 
-console.log(computeLostDiff(startArray, endArray));
+const finalArray = diffToFinal(avg, min, max, diffArrayDEC);
+console.log(finalArray);
+
+console.log(computeLostDiff(startArray, finalArray));
+console.log(calculateRelativeError(startArray, finalArray));
 
