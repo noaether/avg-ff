@@ -31,28 +31,6 @@ function computeLostDiff(startArray, endArray) {
  */
 function divideRangeIntoSections(min, max, avg) {
 
-  /*
-  * WHY IT WORKS
-  * Considering a max number of sections = 15 sections, take x as
-  * above avg sections = x - 1
-  * below avg sections = 15 - x
-  * a = (Δ_MaxAvg)÷(1-x) => if there are '1-x' sections, each section will cover 'a' numbers
-  * b = (Δ_AvgMin)÷(15-x) => if there are '15-x' sections, each section will cover 'b' numbers
-  *
-  * therefore
-  *
-  * (x-1)(Δ_MaxAvg)÷(x-1)
-  *   => (x-1)^2 = (Δ_MaxAvg)
-  *   => x = -sqrt(Δ_MaxAvg)+1
-  *   => x = 1 - sqrt(Δ_MaxAvg)  => starting from the end, there are x sections for the "above average" range
-  *   => y = (Δ_MaxAvg)÷(1-x)    => each section covers y numbers
-  * (15-x) = (Δ_AvgMin)÷(15-x)
-  *   => (15-x)^2 = (Δ_AvgMin)
-  *   => x = -sqrt(Δ_AvgMin)+15
-  *   => x = 15 - sqrt(Δ_AvgMin) => starting from the beginning, there are x sections for the "below average" range
-  *   => y = (Δ_AvgMin)÷(15-x)   => each section covers y numbers
-  */
-
   const deltaMaxAvg = max - avg;
   const deltaAvgMin = avg - min;
 
@@ -130,11 +108,13 @@ function calculateRelativeError(startArray, finalArray) {
 }
 
 
-const startArray = [255, 212, 212, 161, 161, 120, 120, 84, 84];
+const startArray = [139, 194, 115, 196, 246, 2, 181, 104, 204];
 
 const max = getMax(startArray);
 const avg = Math.round(getAvg(startArray));
 const min = getMin(startArray);
+
+console.log(`Max: ${max}, Avg: ${avg}, Min: ${min}`);
 
 const dRIS = divideRangeIntoSections(min, max, avg);
 console.log("DRIS\r\n", dRIS);
